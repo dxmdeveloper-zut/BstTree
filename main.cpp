@@ -1,8 +1,7 @@
 #include <iostream>
+#include <random>
 #include "bst_tree.hpp"
 
-// random int generator
-#include <random>
 template<class T>
 T random_int(T min, T max) {
     static std::random_device rd;
@@ -12,9 +11,9 @@ T random_int(T min, T max) {
 }
 
 int main() {
-    bst_tree<int> test_tree {};
-    auto subcmpr = [](auto a, auto b){return a - b;};
-    for(size_t i = 0; i < 28; i++){
+    bst_tree<int> test_tree{};
+    auto subcmpr = [](auto a, auto b) { return a - b; };
+    for (size_t i = 0; i < 28; i++) {
         test_tree.add(random_int<int>(-100, 100), subcmpr);
     }
 

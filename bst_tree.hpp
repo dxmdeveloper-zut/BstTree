@@ -6,8 +6,7 @@
 #include <valarray>
 
 template<class T>
-struct _tree_node
-{
+struct _tree_node {
     size_t uniq_id;
 
     _tree_node<T> *parent = nullptr;
@@ -17,20 +16,17 @@ struct _tree_node
     T data;
 
     _tree_node(T data, size_t uniq_id)
-        : data(data), uniq_id(uniq_id)
-    {};
+            : data(data), uniq_id(uniq_id) {};
 };
 
 template<class T>
-struct node_with_depth
-{
+struct node_with_depth {
     _tree_node<T> *node;
     size_t depth;
 };
 
 template<class T>
-class bst_tree
-{
+class bst_tree {
 private:
     _tree_node<T> *root = nullptr;
     size_t tree_size = 0;
@@ -54,8 +50,7 @@ public:
 
     std::string to_html() const;
 
-    ~bst_tree()
-    { clear(); }
+    ~bst_tree() { clear(); }
 
 private:
 
@@ -69,8 +64,7 @@ private:
 };
 
 template<class T>
-void bst_tree<T>::clear()
-{
+void bst_tree<T>::clear() {
     _tree_node<T> *node = nullptr;
     while ((node = next_inorder(nullptr))) {
         remove_node(node);
@@ -79,11 +73,10 @@ void bst_tree<T>::clear()
 }
 
 template<class T>
-void bst_tree<T>::remove(size_t uniq_id)
-{
+void bst_tree<T>::remove(size_t uniq_id) {
     _tree_node<T> node = nullptr;
-    while((node = next_preorder(node))){
-        if(node->uniq_id == uniq_id){
+    while ((node = next_preorder(node))) {
+        if (node->uniq_id == uniq_id) {
             remove_node(node);
             return;
         }
@@ -91,27 +84,28 @@ void bst_tree<T>::remove(size_t uniq_id)
 }
 
 template<class T>
-bool bst_tree<T>::remove(const T &data, std::function<bool(const T &, const T &)> cmp)
-{
+bool bst_tree<T>::remove(const T &data, std::function<bool(const T &, const T &)> cmp) {
     _tree_node<T> *node = find(data, cmp);
     if (node == nullptr) return false;
     return remove_node(node);
 }
 
 template<class T>
-bool bst_tree<T>::remove_node(_tree_node<T> *node)
-{
+bool bst_tree<T>::remove_node(_tree_node<T> *node) {
     if (root == nullptr) return false;
 
     if (node == root) {
         // when node is a root
         if (node->left_child) {
             root = node->left_child;
+            root->right_child = node->right_child;
             root->parent = nullptr;
             if (node->right_child)
                 node->right_child->parent = root; // new root pointer assignment
         } else if (node->right_child) {
             root = node->right_child;
+
+            root->left_child = nullptr;
             root->parent = nullptr;
         } else root = nullptr;
 
@@ -131,8 +125,9 @@ bool bst_tree<T>::remove_node(_tree_node<T> *node)
         }
         if (replnode) {
 
-            if (replnode->parent->right_child == replnode) replnode->parent->right_child = nullptr; // Źle - co jeżeli replnode->right_child?
-            else replnode->parent->left_child = nullptr;
+            if (replnode->parent->right_child == replnode)
+                replnode->parent->right_child = replnode->left_child ? replnode->left_child : nullptr;
+            else replnode->parent->left_child = replnode->right_child ? replnode->right_child : nullptr;
 
             node->data = replnode->data;
             node->uniq_id = replnode->uniq_id;
@@ -152,8 +147,7 @@ bool bst_tree<T>::remove_node(_tree_node<T> *node)
 }
 
 template<class T>
-T *bst_tree<T>::find(const T &data, std::function<bool(const T &, const T &)> cmpr) const
-{
+T *bst_tree<T>::find(const T &data, std::function<bool(const T &, const T &)> cmpr) const {
     if (root == nullptr) return nullptr;
     auto *node = root;
     int res;
@@ -166,8 +160,7 @@ T *bst_tree<T>::find(const T &data, std::function<bool(const T &, const T &)> cm
 }
 
 template<class T>
-std::string bst_tree<T>::to_string() const
-{
+std::string bst_tree<T>::to_string() const {
     std::stringstream ss{};
     ss << "{\n\theight: " << get_height() << ",\n\tsize: " << tree_size << ",\n\troot: " << root;
 
@@ -189,9 +182,9 @@ std::string bst_tree<T>::to_string() const
 
     return ss.str();
 }
+
 template<class T>
-size_t bst_tree<T>::get_height() const
-{
+size_t bst_tree<T>::get_height() const {
     if (root == nullptr) return 0;
 
     node_with_depth<T> node_w_depth{nullptr, 0};
@@ -203,8 +196,7 @@ size_t bst_tree<T>::get_height() const
 }
 
 template<class T>
-std::string bst_tree<T>::to_html() const
-{
+std::string bst_tree<T>::to_html() const {
     auto *root = this->root;
     auto h = this->get_height();
     auto get_node_of_lvl = [root](size_t level, size_t ind) -> _tree_node<T> * {
@@ -244,8 +236,7 @@ std::string bst_tree<T>::to_html() const
 }
 
 template<class T>
-void bst_tree<T>::add(T data, std::function<int(const T &, const T &)> cmpr)
-{
+void bst_tree<T>::add(T data, std::function<int(const T &, const T &)> cmpr) {
     auto *node = new _tree_node<T>(data, uniq_id_cnt++);
     tree_size++;
     if (root == nullptr) {
@@ -273,8 +264,8 @@ void bst_tree<T>::add(T data, std::function<int(const T &, const T &)> cmpr)
 }
 
 template<class T>
-_tree_node<T> *bst_tree<T>::next_inorder(_tree_node<T> *node) const
-{
+_tree_node<T> *bst_tree<T>::next_inorder(_tree_node<T> *node) const {
+    if (root == nullptr) return nullptr;
 
     if (node == nullptr || node->right_child) {
         node = node ? node->right_child : root;
@@ -294,8 +285,9 @@ _tree_node<T> *bst_tree<T>::next_inorder(_tree_node<T> *node) const
 }
 
 template<class T>
-node_with_depth<T> bst_tree<T>::next_preorder(node_with_depth<T> node_w_depth) const
-{
+node_with_depth<T> bst_tree<T>::next_preorder(node_with_depth<T> node_w_depth) const {
+    if (root == nullptr) return {nullptr, 0};
+
     auto *node = node_w_depth.node;
     auto depth = node_w_depth.depth;
 
@@ -319,7 +311,6 @@ node_with_depth<T> bst_tree<T>::next_preorder(node_with_depth<T> node_w_depth) c
 }
 
 template<class T>
-_tree_node<T> *bst_tree<T>::next_preorder(_tree_node<T> *node) const
-{
+_tree_node<T> *bst_tree<T>::next_preorder(_tree_node<T> *node) const {
     return next_preorder({node, 0}).node;
 }
